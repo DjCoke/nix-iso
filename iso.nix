@@ -1,11 +1,12 @@
 { modulesPath, pkgs, ... }:
 {
   imports = [
-    "${modulesPath}/installer/cd-dvd/installation-cd-graphical-plasma5.nix"
+    "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
+    "${modulesPath}/installer/cd-dvd/channel.nix"
   ];
 
   # Enables copy / paste when running in a KVM with spice.
-  services.spice-vdagentd.enable = true;
+  # services.spice-vdagentd.enable = true;
 
   users.users.nixos.shell = pkgs.zsh;
   programs.zsh.enable = true;
@@ -16,10 +17,32 @@
     ripgrep
     tree
     xclip # for clipboard support in neovim
+    git
+    curl
+    rsync
   ];
 
+  services = {
+    qemuGuest.enable = true;
+    openssh = {
+      enable = true;
+      ports = [ 22 ];
+      settings.PermitRootLogin = "yes";
+    };
+  };
+
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    warn-dirty = false;
+  };
+
+  system.stateVersion = "23.11";
+
   home-manager.users.nixos = {
-    home.stateVersion = "21.11";
+    home.stateVersion = "23.11";
 
     programs = {
       alacritty.enable = true;
@@ -34,7 +57,6 @@
 
       neovim = {
         enable = true;
-        extraConfig = builtins.readFile ./nvim/init.vim;
       };
     };
   };
